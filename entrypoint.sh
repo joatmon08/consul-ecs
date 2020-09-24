@@ -17,9 +17,11 @@ fi
 
 # If we do not need to register a service just run the command
 if [ ! -z "$SERVICE_CONFIG" ]; then
+  export CONSUL_HTTP_ADDR=https://$(curl -s http://169.254.169.254/latest/meta-data/local-ipv4):8501
+  echo ${CONSUL_SERVICE_CONFIG} | base64 -d > ${SERVICE_CONFIG}
   # Wait until Consul can be contacted
   until curl -s -k ${CONSUL_HTTP_ADDR}/v1/status/leader | grep 8300; do
-    echo "Waiting for Consul to start"
+    echo "Waiting for Consul to start at ${CONSUL_HTTP_ADDR}..."
     sleep 1
   done
 
