@@ -12,7 +12,7 @@ if [ ! -z "$CONSUL_CLIENT_CONFIG" ]; then
   EC2_NODE_NAME=$(curl -s http://169.254.169.254/latest/meta-data/local-hostname  | cut -f1 -d.)
   echo "Using EC2 host address ${EC2_HOST_ADDRESS}..."
   echo "Using EC2 node name ${EC2_NODE_NAME}..."
-  echo $CONSUL_CLIENT_CONFIG | base64 -d | jq '.auto_encrypt.ip_san = ['\"$EC2_HOST_ADDRESS\"'] | .advertise_addr = '\"$EC2_HOST_ADDRESS\"' | .node_name = '\"$EC2_NODE_NAME\"'' > /consul/config/client.json
+  echo $CONSUL_CLIENT_CONFIG | base64 -d | jq '.auto_encrypt.ip_san = ['\"$EC2_HOST_ADDRESS\"'] | .advertise_addr = '\"$EC2_HOST_ADDRESS\"'' > /consul/config/client.json
 fi
 
 # If we do not need to register a service just run the command
