@@ -17,28 +17,26 @@ fi
 
 # If we do not need to register a service just run the command
 if [ ! -z "$SERVICE_CONFIG" ]; then
-  if [ -z "$CONSUL_SERVER_ADDR"]; then
-    echo "Specify CONSUL_SERVER_ADDR for certificate..."
+  if [ -z "$CONSUL_CACERT" ]; then
+    echo "Specify CONSUL_CACERT for certificate file..."
     exit 1
   fi
-
-  if [ -z "$CONSUL_CACERT"]; then
-    echo "Specify CONSUL_CACERT for certificate..."
-    exit 1
-  fi
-
-  echo "Retrieve server certificate"
-  curl -s ${CONSUL_SERVER_ADDR}:8500/v1/connect/ca/roots | \
-  jq -r '.ActiveRootID as $activeRoot | .Roots | map(select(.ID == $activeRoot)) | .[0].RootCert' | \
-  sed '/^[[:space:]]*$/d' > ${CONSUL_CACERT}
-
+  
+  export CONSUL_HTTP_SSL=true
   export CONSUL_HTTP_ADDR=https://$(curl -s http://169.254.169.254/latest/meta-data/local-ipv4):8501
+  export CONSUL_GRPC_ADDR=$(curl -s http://169.254.169.254/latest/meta-data/local-ipv4):8502
+
   echo ${CONSUL_SERVICE_CONFIG} | base64 -d > ${SERVICE_CONFIG}
   # Wait until Consul can be contacted
   until curl -s -k ${CONSUL_HTTP_ADDR}/v1/status/leader | grep 8300; do
     echo "Waiting for Consul to start at ${CONSUL_HTTP_ADDR}..."
     sleep 1
   done
+
+  echo "Retrieve server certificate..."
+  curl -s -k ${CONSUL_HTTP_ADDR}/v1/connect/ca/roots | \
+  jq -r '.ActiveRootID as $activeRoot | .Roots | map(select(.ID == $activeRoot)) | .[0].RootCert' | \
+  sed '/^[[:space:]]*$/d' > ${CONSUL_CACERT}
 
   # register the service with consul
   echo "Registering service with consul $SERVICE_CONFIG"
