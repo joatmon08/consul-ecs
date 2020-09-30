@@ -21,7 +21,7 @@ if [ ! -z "$SERVICE_CONFIG" ]; then
     echo "Specify CONSUL_CACERT for certificate file..."
     exit 1
   fi
-  
+
   export CONSUL_HTTP_SSL=true
   export CONSUL_HTTP_ADDR=https://$(curl -s http://169.254.169.254/latest/meta-data/local-ipv4):8501
   export CONSUL_GRPC_ADDR=$(curl -s http://169.254.169.254/latest/meta-data/local-ipv4):8502
@@ -37,9 +37,8 @@ if [ ! -z "$SERVICE_CONFIG" ]; then
   curl -s -k ${CONSUL_HTTP_ADDR}/v1/connect/ca/roots | \
   jq -r '.ActiveRootID as $activeRoot | .Roots | map(select(.ID == $activeRoot)) | .[0].RootCert' | \
   sed '/^[[:space:]]*$/d' > ${CONSUL_CACERT}
-
-  # register the service with consul
-  echo "Registering service with consul $SERVICE_CONFIG"
+    # register the service with consul
+  echo "Registering service with consul ${SERVICE_CONFIG}..."
   consul services register ${SERVICE_CONFIG}
   
   exit_status=$?
@@ -49,6 +48,19 @@ if [ ! -z "$SERVICE_CONFIG" ]; then
     echo ""
     exit 1
   fi
+
+  export CONSUL_CLIENT_CERT="/tmp/consul-ca-service.pem"
+  export CONSUL_CLIENT_KEY="/tmp/consul-ca-service-key.pem"
+  export CONSUL_SERVICE_NAME=$(jq -r '.service.name' ${SERVICE_CONFIG})
+
+  echo "Retrieve leaf certificate for ${CONSUL_SERVICE_NAME}..."
+  curl -s -k -H "X-Consul-Token:${CONSUL_HTTP_TOKEN}" ${CONSUL_HTTP_ADDR}/v1/agent/connect/ca/leaf/${CONSUL_SERVICE_NAME} | \
+  jq -r '.CertPEM' | \
+  sed '/^[[:space:]]*$/d' > ${CONSUL_CLIENT_CERT}
+  
+  curl -s -k -H "X-Consul-Token:${CONSUL_HTTP_TOKEN}" ${CONSUL_HTTP_ADDR}/v1/agent/connect/ca/leaf/${CONSUL_SERVICE_NAME} | \
+  jq -r '.PrivateKeyPEM' | \
+  sed '/^[[:space:]]*$/d' > ${CONSUL_CLIENT_KEY}
   
   # make sure the service deregisters when exit
   trap "consul services deregister ${SERVICE_CONFIG}" SIGINT SIGTERM EXIT
