@@ -14,6 +14,8 @@ RUN apk add -u bash curl jq && \
     mkdir -p /consul/data
 
 COPY ./entrypoint.sh /entrypoint.sh
+COPY ./client_config.json /client_config.json
+COPY ./service_config.json /service_config.json
 RUN chmod +x /entrypoint.sh
 
 ENTRYPOINT ["/entrypoint.sh"]

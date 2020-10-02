@@ -1,0 +1,28 @@
+{
+  "service": {
+    "name": "",
+    "id": "",
+    "token": "",
+    "address": "",
+    "port": 0,
+    "check": {
+      "http": "",
+      "method": "GET",
+      "interval": "",
+      "timeout": ""
+    },
+    "connect": {
+      "sidecar_service": {
+        "port": 21000,
+        "check": {
+          "name": "Connect Envoy Sidecar",
+          "tcp": "",
+          "interval": "10s"
+        },
+        "proxy": {
+          "upstreams": []
+        }
+      }
+    }
+  }
+}
