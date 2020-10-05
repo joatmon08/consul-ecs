@@ -61,7 +61,14 @@ set_client_configuration()
       .retry_join = ["'${CONSUL_HTTP_ADDR}'"] |
       .auto_encrypt.ip_san = ["'${EC2_HOST_ADDRESS}'"]' ./client_config.json > ${CLIENT_CONFIG_FILE}
 
-  consul agent -config-dir=/consul/config
+  trap "consul leave" SIGINT SIGTERM EXIT
+
+  consul agent -config-dir=/consul/config &
+  
+  # Block using tail so the trap will fire
+  tail -f /dev/null &
+  PID=$!
+  wait $PID  
 }
 
 set_proxy_configuration()
@@ -141,14 +148,14 @@ set_proxy_configuration()
     exit 1
   fi
 
+  trap "consul services deregister ${SERVICE_CONFIG_FILE}" SIGINT SIGTERM EXIT
+
   consul connect envoy -sidecar-for=${SERVICE_ID} &
   
   # Block using tail so the trap will fire
   tail -f /dev/null &
   PID=$!
   wait $PID
-
-  trap "consul services deregister ${SERVICE_CONFIG_FILE}" SIGINT SIGTERM EXIT
 }
 
 check_required_environment_variables
