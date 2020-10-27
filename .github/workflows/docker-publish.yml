@@ -31,7 +31,7 @@ jobs:
             docker-compose --file docker-compose.test.yml build
             docker-compose --file docker-compose.test.yml run sut
           else
-            docker build . --file Dockerfile -build-arg CONSUL_VERSION=${CONSUL_VERSION} --build-arg ENVOY_VERSION=${ENVOY_VERSION}
+            docker build . --file Dockerfile --build-arg CONSUL_VERSION=${CONSUL_VERSION} --build-arg ENVOY_VERSION=${ENVOY_VERSION}
           fi
 
   # Push image to GitHub Packages.
@@ -52,7 +52,7 @@ jobs:
           CONSUL_VERSION=$(echo ${VERSION} | cut -d- -f1 | sed -e 's/^v//')
           ENVOY_VERSION=$(echo ${VERSION} | cut -d- -f2 | sed -e 's/^v//')
           
-          docker build . --file Dockerfile --tag $IMAGE_NAME -build-arg CONSUL_VERSION=${CONSUL_VERSION} --build-arg ENVOY_VERSION=${ENVOY_VERSION}
+          docker build . --file Dockerfile --tag $IMAGE_NAME --build-arg CONSUL_VERSION=${CONSUL_VERSION} --build-arg ENVOY_VERSION=${ENVOY_VERSION}
 
       - name: Log into GitHub Container Registry
       # TODO: Create a PAT with `read:packages` and `write:packages` scopes and save it as an Actions secret `CR_PAT`
