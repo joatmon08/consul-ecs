@@ -23,9 +23,7 @@ check_required_environment_variables()
 get_server_certificate()
 {
   echo "Retrieving server certificate and writing it to ${CONSUL_CACERT}."
-  curl -s -k -H "X-Consul-Token:${CONSUL_HTTP_TOKEN}" ${CONSUL_HTTP_ADDR}/v1/connect/ca/roots | \
-  jq -r '.ActiveRootID as $activeRoot | .Roots | map(select(.ID == $activeRoot)) | .[0].RootCert' | \
-  sed '/^[[:space:]]*$/d' > ${CONSUL_CACERT}
+  curl -s -k -H "X-Consul-Token:${CONSUL_HTTP_TOKEN}" ${CONSUL_HTTP_ADDR}/v1/connect/ca/roots?pem=true > ${CONSUL_CACERT}
 }
 
 set_client_configuration()
