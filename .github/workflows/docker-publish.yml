@@ -23,11 +23,15 @@ jobs:
 
       - name: Run tests
         run: |
+          VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+          CONSUL_VERSION=$(echo ${VERSION} | cut -d- -f1 | sed -e 's/^v//')
+          ENVOY_VERSION=$(echo ${VERSION} | cut -d- -f2 | sed -e 's/^v//')
+
           if [ -f docker-compose.test.yml ]; then
             docker-compose --file docker-compose.test.yml build
             docker-compose --file docker-compose.test.yml run sut
           else
-            docker build . --file Dockerfile
+            docker build . --file Dockerfile -build-arg CONSUL_VERSION=${CONSUL_VERSION} --build-arg ENVOY_VERSION=${ENVOY_VERSION}
           fi
 
   # Push image to GitHub Packages.
