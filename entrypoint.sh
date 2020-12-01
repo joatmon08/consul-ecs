@@ -62,11 +62,11 @@ set_client_configuration()
   trap "consul leave" SIGINT SIGTERM EXIT
 
   consul agent -config-dir=/consul/config &
-  
+
   # Block using tail so the trap will fire
   tail -f /dev/null &
   PID=$!
-  wait $PID  
+  wait $PID
 }
 
 set_proxy_configuration()
@@ -128,7 +128,7 @@ set_proxy_configuration()
       .service.check.interval = "'${SERVICE_HEALTH_CHECK_INTERVAL}'" | 
       .service.check.timeout = "'${SERVICE_HEALTH_CHECK_TIMEOUT}'" | 
       .service.connect.sidecar_service.check.tcp = "'${SIDECAR_HEALTH_CHECK}'"' ./service_config.json > ${SERVICE_CONFIG_FILE}
-  
+
   # Wait until Consul can be contacted
   until curl -s -k ${CONSUL_HTTP_ADDR}/v1/status/leader | grep 8300; do
     echo "Waiting for Consul to start at ${CONSUL_HTTP_ADDR}."
@@ -137,7 +137,7 @@ set_proxy_configuration()
 
   echo "Registering service with consul ${SERVICE_CONFIG_FILE}."
   consul services register ${SERVICE_CONFIG_FILE}
-  
+
   exit_status=$?
   if [ $exit_status -ne 0 ]; then
     echo "### Error writing service config: ${SERVICE_CONFIG_FILE} ###"
@@ -149,7 +149,7 @@ set_proxy_configuration()
   trap "consul services deregister ${SERVICE_CONFIG_FILE}" SIGINT SIGTERM EXIT
 
   consul connect envoy -sidecar-for=${SERVICE_ID} &
-  
+
   # Block using tail so the trap will fire
   tail -f /dev/null &
   PID=$!

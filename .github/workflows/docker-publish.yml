@@ -22,7 +22,6 @@ jobs:
           VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
           CONSUL_VERSION=$(echo ${VERSION} | cut -d- -f1 | sed -e 's/^v//')
           ENVOY_VERSION=$(echo ${VERSION} | cut -d- -f2 | sed -e 's/^v//')
-          
           docker build . --file Dockerfile --tag $IMAGE_NAME --build-arg CONSUL_VERSION=${CONSUL_VERSION} --build-arg ENVOY_VERSION=${ENVOY_VERSION}
 
       - name: Log into Docker Hub
