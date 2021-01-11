@@ -13,6 +13,8 @@
   "verify_incoming_https": false,
   "datacenter": "",
   "encrypt": "",
+  "encrypt_verify_incoming": true,
+  "encrypt_verify_outgoing": true,
   "server": false,
   "log_level": "INFO",
   "ui": true,
