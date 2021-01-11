@@ -7,6 +7,7 @@
       "agent": ""
     }
   },
+  "enable_central_service_config": false,
   "verify_outgoing": true,
   "verify_server_hostname": true,
   "verify_incoming": false,
