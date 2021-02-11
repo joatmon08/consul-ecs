@@ -1,5 +1,7 @@
 # Docker Image for Running Consul on ECS
 
+> Note: This is *not* an officially supported HashiCorp image. It demonstrates the minimal configuration for running Consul on ECS.
+
 This container image contains a number of automated steps
 to run on Amazon ECS.
 
